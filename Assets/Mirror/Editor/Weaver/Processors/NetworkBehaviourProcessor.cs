@@ -72,14 +72,17 @@ namespace Mirror.Weaver
             }
             GenerateConstants();
 
-            GenerateSerialization();
-            if (Weaver.WeavingFailed)
+            try
             {
-                return;
-            }
+                GenerateSerialization();
 
-            GenerateDeSerialization();
-            Weaver.DLog(netBehaviourSubclass, "Process Done");
+                GenerateDeSerialization();
+                Weaver.DLog(netBehaviourSubclass, "Process Done");
+            }
+            catch (WeaverException e)
+            {
+                Weaver.Error(e.Message, e.MemberReference);
+            }
         }
 
         /*
