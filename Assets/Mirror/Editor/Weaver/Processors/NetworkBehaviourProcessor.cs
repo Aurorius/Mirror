@@ -8,8 +8,7 @@ namespace Mirror.Weaver
     {
         Command,
         ClientRpc,
-        TargetRpc,
-        SyncEvent
+        TargetRpc
     }
 
 
@@ -25,11 +24,9 @@ namespace Mirror.Weaver
         readonly List<CmdResult> commands = new List<CmdResult>();
         readonly List<ClientRpcResult> clientRpcs = new List<ClientRpcResult>();
         readonly List<MethodDefinition> targetRpcs = new List<MethodDefinition>();
-        readonly List<EventDefinition> eventRpcs = new List<EventDefinition>();
         readonly List<MethodDefinition> commandInvocationFuncs = new List<MethodDefinition>();
         readonly List<MethodDefinition> clientRpcInvocationFuncs = new List<MethodDefinition>();
         readonly List<MethodDefinition> targetRpcInvocationFuncs = new List<MethodDefinition>();
-        readonly List<MethodDefinition> eventRpcInvocationFuncs = new List<MethodDefinition>();
 
         readonly TypeDefinition netBehaviourSubclass;
 
@@ -63,8 +60,6 @@ namespace Mirror.Weaver
             SyncVarProcessor.ProcessSyncVars(netBehaviourSubclass, syncVars, syncObjects, syncVarNetIds);
 
             ProcessMethods();
-
-            SyncEventProcessor.ProcessEvents(netBehaviourSubclass, eventRpcs, eventRpcInvocationFuncs);
             if (Weaver.WeavingFailed)
             {
                 return;
@@ -208,7 +203,7 @@ namespace Mirror.Weaver
 
         void GenerateConstants()
         {
-            if (commands.Count == 0 && clientRpcs.Count == 0 && targetRpcs.Count == 0 && eventRpcs.Count == 0 && syncObjects.Count == 0)
+            if (commands.Count == 0 && clientRpcs.Count == 0 && targetRpcs.Count == 0 && syncObjects.Count == 0)
                 return;
 
             Weaver.DLog(netBehaviourSubclass, "  GenerateConstants ");
@@ -283,11 +278,6 @@ namespace Mirror.Weaver
             for (int i = 0; i < targetRpcs.Count; ++i)
             {
                 GenerateRegisterRemoteDelegate(cctorWorker, WeaverTypes.registerRpcDelegateReference, targetRpcInvocationFuncs[i], targetRpcs[i].Name);
-            }
-
-            for (int i = 0; i < eventRpcs.Count; ++i)
-            {
-                GenerateRegisterRemoteDelegate(cctorWorker, WeaverTypes.registerEventDelegateReference, eventRpcInvocationFuncs[i], eventRpcs[i].Name);
             }
 
             foreach (FieldDefinition fd in syncObjects)
